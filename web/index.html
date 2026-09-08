@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SNAKE // NEON HUNT</title>
+    <meta name="description" content="Classic Snake. Rewired. A professional cyberpunk arcade game playable directly in the browser.">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="app">
+        <!-- Background Effects -->
+        <div id="bg-grid"></div>
+        <div id="bg-particles"></div>
+
+        <!-- Landing Screen -->
+        <div id="screen-landing" class="screen active">
+            <div class="title-container">
+                <h1 class="glitch-text" data-text="SNAKE">SNAKE</h1>
+                <h2 class="subtitle">// NEON HUNT //</h2>
+                <p class="tagline">CLASSIC. REWIRED.</p>
+            </div>
+            <div class="menu-buttons">
+                <button id="btn-play-now" class="cyber-btn primary">▶ PLAY NOW</button>
+                <button id="btn-leaderboard" class="cyber-btn">🏆 LEADERBOARD</button>
+                <button id="btn-how-to" class="cyber-btn">❔ HOW TO PLAY</button>
+                <button id="btn-settings" class="cyber-btn">⚙ SETTINGS</button>
+            </div>
+        </div>
+
+        <!-- Mode Selection Screen -->
+        <div id="screen-mode-select" class="screen hidden">
+            <h2 class="screen-title">SELECT PROTOCOL</h2>
+            <div class="mode-grid">
+                <div class="mode-card" data-mode="CLASSIC">
+                    <h3>CLASSIC</h3>
+                    <p>Traditional bounds and growth.</p>
+                </div>
+                <div class="mode-card" data-mode="ENDLESS">
+                    <h3>ENDLESS</h3>
+                    <p>Screen wrapping enabled.</p>
+                </div>
+                <div class="mode-card" data-mode="TIME_ATTACK">
+                    <h3>TIME ATTACK</h3>
+                    <p>Maximum score in 3 minutes.</p>
+                </div>
+                <div class="mode-card" data-mode="OBSTACLE">
+                    <h3>OBSTACLE</h3>
+                    <p>Navigate a procedurally generated maze.</p>
+                </div>
+                <div class="mode-card" data-mode="SURVIVAL">
+                    <h3>SURVIVAL</h3>
+                    <p>Speed continuously increases.</p>
+                </div>
+            </div>
+            <button id="btn-back-from-modes" class="cyber-btn text-only">⌂ BACK</button>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="screen-game" class="screen hidden">
+            <div class="hud">
+                <div class="hud-item">
+                    <span class="hud-label">SCORE</span>
+                    <span id="hud-score" class="hud-value">000000</span>
+                </div>
+                <div class="hud-item">
+                    <span class="hud-label">BEST</span>
+                    <span id="hud-best" class="hud-value">000000</span>
+                </div>
+                <div class="hud-item">
+                    <span class="hud-label">LEVEL</span>
+                    <span id="hud-level" class="hud-value">01</span>
+                </div>
+                <div class="hud-item combo-container">
+                    <span class="hud-label">COMBO</span>
+                    <span id="hud-combo" class="hud-value">x1</span>
+                </div>
+                <div class="hud-item" id="hud-time-container" style="display: none;">
+                    <span class="hud-label">TIME</span>
+                    <span id="hud-time" class="hud-value">03:00</span>
+                </div>
+            </div>
+            
+            <div class="canvas-container">
+                <canvas id="gameCanvas"></canvas>
+                <!-- Overlays -->
+                <div id="overlay-pause" class="game-overlay hidden">
+                    <h2 class="glitch-text" data-text="PAUSED">PAUSED</h2>
+                    <div class="menu-buttons small">
+                        <button id="btn-resume" class="cyber-btn primary">▶ RESUME</button>
+                        <button id="btn-restart" class="cyber-btn">↻ RESTART</button>
+                        <button id="btn-quit" class="cyber-btn text-only">⌂ MAIN MENU</button>
+                    </div>
+                </div>
+                
+                <div id="overlay-gameover" class="game-overlay hidden">
+                    <h3 class="system-msg">CONNECTION LOST</h3>
+                    <h2 class="glitch-text terminal-red" data-text="SNAKE TERMINATED">SNAKE TERMINATED</h2>
+                    <div class="stats-panel">
+                        <div class="stat-row"><span>SCORE</span> <span id="go-score">000000</span></div>
+                        <div class="stat-row"><span>LEVEL</span> <span id="go-level">01</span></div>
+                        <div class="stat-row"><span>BEST</span> <span id="go-best">000000</span></div>
+                    </div>
+                    <div id="new-record-msg" class="hidden">★ NEW HIGH SCORE ★</div>
+                    
+                    <div id="name-entry-container" class="hidden">
+                        <label>ENTER CALLSIGN:</label>
+                        <input type="text" id="player-name-input" maxlength="10" placeholder="SHADOW">
+                        <button id="btn-submit-score" class="cyber-btn small">SUBMIT</button>
+                    </div>
+
+                    <div class="menu-buttons small row">
+                        <button id="btn-play-again" class="cyber-btn primary">↻ PLAY AGAIN</button>
+                        <button id="btn-go-menu" class="cyber-btn">⌂ MAIN MENU</button>
+                    </div>
+                </div>
+
+                <div id="achievement-popup" class="hidden">
+                    <div class="ach-icon">🏆</div>
+                    <div class="ach-content">
+                        <div class="ach-title">ACHIEVEMENT UNLOCKED</div>
+                        <div id="ach-name" class="ach-name">LONG BOY</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mobile Controls -->
+            <div class="mobile-controls">
+                <div class="dpad">
+                    <button class="dpad-btn up" id="btn-up">▲</button>
+                    <button class="dpad-btn left" id="btn-left">◀</button>
+                    <button class="dpad-btn right" id="btn-right">▶</button>
+                    <button class="dpad-btn down" id="btn-down">▼</button>
+                </div>
+                <div class="action-buttons">
+                    <button class="action-btn" id="btn-pause-mobile">||</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Leaderboard Screen -->
+        <div id="screen-leaderboard" class="screen hidden">
+            <h2 class="screen-title">NEON CHAMPIONS</h2>
+            <div class="leaderboard-container">
+                <table id="leaderboard-table">
+                    <thead>
+                        <tr>
+                            <th>RANK</th>
+                            <th>CALLSIGN</th>
+                            <th>SCORE</th>
+                            <th>LVL</th>
+                            <th>MODE</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard-body">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+            <button id="btn-back-from-lb" class="cyber-btn text-only">⌂ BACK</button>
+        </div>
+
+        <!-- How To Play Screen -->
+        <div id="screen-how-to" class="screen hidden">
+            <h2 class="screen-title">SYSTEM MANUAL</h2>
+            <div class="info-panel">
+                <h3>CONTROLS</h3>
+                <p>Desktop: <strong>WASD</strong> or <strong>Arrow Keys</strong> to move. <strong>SPACE/ESC</strong> to pause.</p>
+                <p>Mobile: Use on-screen D-Pad or swipe gestures.</p>
+                <h3>ENTITIES</h3>
+                <ul class="entity-list">
+                    <li><span class="color-box normal"></span> <strong>NORMAL (+10)</strong> - Core data block.</li>
+                    <li><span class="color-box rare"></span> <strong>RARE (+25)</strong> - High density data.</li>
+                    <li><span class="color-box gold"></span> <strong>GOLD (+50)</strong> - Encrypted package.</li>
+                    <li><span class="color-box speed"></span> <strong>SPEED ⚡</strong> - Overclocks movement.</li>
+                    <li><span class="color-box slow"></span> <strong>FREEZE ❄</strong> - Underclocks system.</li>
+                    <li><span class="color-box double"></span> <strong>DOUBLE ✦</strong> - 2x score multiplier.</li>
+                    <li><span class="color-box shield"></span> <strong>SHIELD 🛡</strong> - Prevents one collision.</li>
+                </ul>
+            </div>
+            <button id="btn-back-from-howto" class="cyber-btn text-only">⌂ BACK</button>
+        </div>
+
+        <!-- Settings Screen -->
+        <div id="screen-settings" class="screen hidden">
+            <h2 class="screen-title">SYSTEM PREFERENCES</h2>
+            <div class="settings-panel">
+                <div class="setting-row">
+                    <label>SOUND EFFECTS</label>
+                    <button class="toggle-btn" id="toggle-sound">ON</button>
+                </div>
+                <div class="setting-row">
+                    <label>MUSIC</label>
+                    <button class="toggle-btn" id="toggle-music">ON</button>
+                </div>
+                <div class="setting-row">
+                    <label>PARTICLES</label>
+                    <button class="toggle-btn" id="toggle-particles">ON</button>
+                </div>
+                <div class="setting-row">
+                    <label>SCREEN SHAKE</label>
+                    <button class="toggle-btn" id="toggle-shake">ON</button>
+                </div>
+                <div class="setting-row">
+                    <label>BASE SPEED</label>
+                    <select id="select-speed" class="cyber-select">
+                        <option value="SLOW">SLOW</option>
+                        <option value="NORMAL" selected>NORMAL</option>
+                        <option value="FAST">FAST</option>
+                    </select>
+                </div>
+            </div>
+            <button id="btn-back-from-settings" class="cyber-btn text-only">⌂ BACK</button>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="audio.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>
