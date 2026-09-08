@@ -1,0 +1,8 @@
+__pycache__/
+*.py[cod]
+*$py.class
+crash_log.txt
+highscores.json
+.vscode/
+.idea/
+.gemini/
